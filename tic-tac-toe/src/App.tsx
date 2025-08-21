@@ -1,22 +1,8 @@
 import {useState} from 'react'
 import {Cell} from './components/Cell'
-
-const TURNS = {
-  X: 'x',
-  O: 'o'
-}
-
-const WINNER_COMBOS = [
-  [0,1,2],
-  [3,4,5],
-  [6,7,8],
-  [0,3,6],
-  [1,4,7],
-  [2,5,8],
-  [0,4,8],
-  [2,4,6]
-]
-
+import {StaticCell} from './components/StaticCell'
+import {Winner} from './components/Winner'
+import {TURNS, WINNER_COMBOS} from './constants'
 
 function App() {
   const [turn, setTurn] = useState(TURNS.X)
@@ -33,6 +19,10 @@ function App() {
     return null;
   }
 
+  const checkEndGame = (board:Array<string | null>) => {
+    return board.every(cell => cell !== null);
+  }
+
   const updateBoard = (index:number) => {
     if(board[index] || winner) return;
     const newBoard = [...board];
@@ -40,15 +30,27 @@ function App() {
     setBoard(newBoard);
     
     const newWinner = checkWinner(newBoard);
-    if (newWinner) setWinner(newWinner);
+    if (newWinner) {
+      setWinner(newWinner);
+    } else if (checkEndGame(newBoard)){
+      setWinner(false);
+    }
 
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
     setTurn(newTurn);
   }
 
+  const reset = () => {
+    setBoard(Array(9).fill(null));
+    setWinner(null);
+    setTurn(TURNS.X);
+  }
+
   return (
     <main className="w-[678px] flex items-center justify-center flex-col mx-auto h-screen gap-4">
       <h1 className='text-4xl font-semibold'>Tic-tac-toe</h1>
+      <button className="px-2 py-3 m-6 bg-transparent border-2 border-gray-100 text-gray-100 
+                w-[100px] rounded-md transition-colors font-bold cursor-pointer hover:bg-gray-100 hover:text-gray-800" onClick={reset}>Reiniciar</button>
       <section className='grid grid-cols-3 gap-4'>
         {board.map((_,index)=>{
           return (
@@ -62,9 +64,10 @@ function App() {
         })}
       </section>
       <section className='flex gap-4'>
-        <Cell isSelected={turn === TURNS.X}>{TURNS.X}</Cell>
-        <Cell isSelected={turn === TURNS.O}>{TURNS.O}</Cell>
+        <StaticCell isSelected={turn === TURNS.X}>{TURNS.X}</StaticCell>
+        <StaticCell isSelected={turn === TURNS.O}>{TURNS.O}</StaticCell>
       </section>
+      <Winner winner={winner} reset={reset}/>
     </main>
   )
 }

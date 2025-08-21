@@ -13,8 +13,8 @@ export const Cell = ({children, isSelected, updateBoard, index}:CellProps) => {
   
   return (
     <div onClick={handleClick} className={`w-[100px] h-[100px] border-2 border-gray-100 
-    rounded-md grid place-items-center cursor-pointer text-5xl
-    ${isSelected ? "bg-[#09f]":"" }`} key={index}>
+    rounded-md grid place-items-center cursor-pointer text-5xl hover:border-4
+    ${isSelected ? "bg-[#1e59fc]":"" }`} key={index}>
       <span>
         {children}
       </span>
