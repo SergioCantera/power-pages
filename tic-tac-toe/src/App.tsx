@@ -63,7 +63,7 @@ function App() {
 
   return (
     <main className="w-[678px] flex items-center justify-center flex-col mx-auto h-screen gap-4">
-      <h1 className='text-4xl font-semibold'>Tic-tac-toe</h1>
+      <h1 className='text-4xl font-semibold tex-gray-100'>Tic-tac-toe</h1>
       <button className="px-2 py-3 m-6 bg-transparent border-2 border-gray-100 text-gray-100 
                 w-[100px] rounded-md transition-colors font-bold cursor-pointer hover:bg-gray-100 hover:text-gray-800" onClick={reset}>Reiniciar</button>
       <section className='grid grid-cols-3 gap-4'>
