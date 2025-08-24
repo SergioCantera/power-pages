@@ -11,7 +11,18 @@ import {
   TableRow,
   CircularProgress,
   Alert,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
+  Button,
+  TextField
 } from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 
 interface Lead {
   accountId: number;
@@ -25,6 +36,44 @@ const SalesLeads: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUnauthorized, setIsUnauthorized] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [formData, setFormData] = useState<Partial<Lead>>({});
+
+  const handleOpen = (lead?: Lead) => {
+    if (lead) {
+      setSelectedLead(lead);
+      setFormData(lead);
+    } else {
+      setSelectedLead(null);
+      setFormData({});
+    }
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedLead(null);
+    setFormData({});
+  };
+
+  const handleSubmit = () => {
+    if (selectedLead) {
+      setLeads(leads.map(lead =>
+        lead.accountId === selectedLead.accountId ? { ...lead, ...formData } : lead
+      ));
+    } else {
+      const newLead: Lead = {
+        accountId: leads.length + 1,
+        name: formData.name || '',
+        type: formData.type || '',
+        description: formData.description || '',
+        amount: formData.amount || '',
+      };
+      setLeads([...leads, newLead]);
+    }
+    handleClose();
+  };
 
   const fetchLeads = async () => {
     try {
@@ -83,6 +132,15 @@ const SalesLeads: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           Sales Leads
         </Typography>
+        {!isUnauthorized && !isLoading &&
+          <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpen()}
+            >
+            Add Customer
+          </Button>
+        }
       </Box>
 
       {isUnauthorized && (
@@ -121,6 +179,49 @@ const SalesLeads: React.FC = () => {
           </Table>
         </TableContainer>
       )}
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>
+          {selectedLead ? 'Edit Customer' : 'Add New Customer'}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Name"
+            fullWidth
+            value={formData.name || ''}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Type"
+            type="string"
+            fullWidth
+            value={formData.type || ''}
+            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            fullWidth
+            value={formData.description || ''}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Amount"
+            fullWidth
+            value={formData.amount || ''}
+            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSubmit} variant="contained">
+            {selectedLead ? 'Save' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
