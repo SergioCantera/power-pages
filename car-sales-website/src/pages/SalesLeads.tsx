@@ -19,17 +19,15 @@ import {
   TextField
 } from '@mui/material';
 import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
+  Add as AddIcon
 } from '@mui/icons-material';
 
 interface Lead {
-  accountId: number;
-  name: string;
-  type: string;
-  description: string;
-  amount: string;
+  sample_accountid: number;
+  sample_name: string;
+  sample_type: string;
+  sample_description: string;
+  sample_amount: number;
 }
 
 const SalesLeads: React.FC = () => {
@@ -57,27 +55,43 @@ const SalesLeads: React.FC = () => {
     setFormData({});
   };
 
-  const handleSubmit = () => {
-    if (selectedLead) {
-      setLeads(leads.map(lead =>
-        lead.accountId === selectedLead.accountId ? { ...lead, ...formData } : lead
-      ));
-    } else {
+  const handleSubmit = async () => {
+    try{
       const newLead: Lead = {
-        accountId: leads.length + 1,
-        name: formData.name || '',
-        type: formData.type || '',
-        description: formData.description || '',
-        amount: formData.amount || '',
+        sample_accountid: leads.length + 1,
+        sample_name: formData.sample_name || '',
+        sample_type: formData.sample_type || '',
+        sample_description: formData.sample_description || '',
+        sample_amount: formData.sample_amount || 0,
       };
-      setLeads([...leads, newLead]);
+      const response = await fetch('/_api/sample_salesleads',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'OData-MaxVersion': '4.0',
+            'OData-Version': '4.0'
+          },
+          body: JSON.stringify(newLead),
+        }
+      );
+      if (!response.ok){
+        throw new Error(`Failed to create a new Lead`)
+      }
+    setLeads([...leads, newLead]);
+    } catch (err) {
+
+    } finally {
+      //doing common actions like setUpdating, close modal, etc
+      handleClose();
     }
-    handleClose();
   };
 
   const fetchLeads = async () => {
     try {
-      const response = await fetch("/_api/sample_salesleads?$select=sample_accountid,sample_name,sample_type,sample_description,sample_amount");
+      const response = await fetch(
+        "/_api/sample_salesleads?$select=sample_accountid,sample_name,sample_type,sample_description,sample_amount");
 
       if (response.status === 403) {
         setIsUnauthorized(true);
@@ -94,12 +108,12 @@ const SalesLeads: React.FC = () => {
 
       for (let i = 0; i < leads.length; i++) {
         const lead = leads[i];
-        const accountId = lead.sample_accountid;
-        const name = lead.sample_name;
-        const type = lead.sample_type;
-        const description = lead.sample_description;
-        const amount = lead.sample_amount;
-        returnData.push({ accountId, name, type, description, amount });
+        const sample_accountid = lead.sample_accountid;
+        const sample_name = lead.sample_name;
+        const sample_type = lead.sample_type;
+        const sample_description = lead.sample_description;
+        const sample_amount = lead.sample_amount;
+        returnData.push({ sample_accountid, sample_name, sample_type, sample_description, sample_amount });
       }
 
       return returnData;
@@ -132,15 +146,15 @@ const SalesLeads: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           Sales Leads
         </Typography>
-        {!isUnauthorized && !isLoading &&
+        {!isLoading && (
           <Button
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => handleOpen()}
             >
-            Add Customer
+            Add Lead
           </Button>
-        }
+        )}
       </Box>
 
       {isUnauthorized && (
@@ -167,12 +181,12 @@ const SalesLeads: React.FC = () => {
             </TableHead>
             <TableBody>
               {leads.map((lead) => (
-                <TableRow key={lead.accountId}>
-                  <TableCell>{lead.accountId}</TableCell>
-                  <TableCell>{lead.name}</TableCell>
-                  <TableCell>{lead.type}</TableCell>
-                  <TableCell>{lead.description}</TableCell>
-                  <TableCell>{lead.amount}</TableCell>
+                <TableRow key={lead.sample_accountid}>
+                  <TableCell>{lead.sample_accountid}</TableCell>
+                  <TableCell>{lead.sample_name}</TableCell>
+                  <TableCell>{lead.sample_type}</TableCell>
+                  <TableCell>{lead.sample_description}</TableCell>
+                  <TableCell>{lead.sample_amount}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -189,30 +203,31 @@ const SalesLeads: React.FC = () => {
             margin="dense"
             label="Name"
             fullWidth
-            value={formData.name || ''}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            value={formData.sample_name || ''}
+            onChange={(e) => setFormData({ ...formData, sample_name: e.target.value })}
           />
           <TextField
             margin="dense"
             label="Type"
             type="string"
             fullWidth
-            value={formData.type || ''}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            value={formData.sample_type || ''}
+            onChange={(e) => setFormData({ ...formData, sample_type: e.target.value })}
           />
           <TextField
             margin="dense"
             label="Description"
             fullWidth
-            value={formData.description || ''}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            value={formData.sample_description || ''}
+            onChange={(e) => setFormData({ ...formData, sample_description: e.target.value })}
           />
           <TextField
             margin="dense"
             label="Amount"
+            type="number"
             fullWidth
-            value={formData.amount || ''}
-            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+            value={formData.sample_amount || 0}
+            onChange={(e) => setFormData({ ...formData, sample_amount: parseFloat(e.target.value) })}
           />
         </DialogContent>
         <DialogActions>
